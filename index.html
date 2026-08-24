@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Posto Novo Horizonte — Contas a Pagar e Fluxo</title>
+<style>
+:root{--ink:#14181d;--ink2:#404a54;--muted:#79848f;--line:#e4e7ea;--paper:#f6f5f2;--card:#fff;--brand:#0e5a3c;--brand2:#127a51;--red:#b0341d;--amber:#c8791b;--blue:#215e8c;--chip:#eef1ee;--shadow:0 1px 2px rgba(16,24,32,.04),0 8px 24px rgba(16,24,32,.06);}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:Georgia,'Times New Roman',serif;font-weight:600;letter-spacing:-.01em;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.mono{font-family:'SFMono-Regular',Consolas,monospace;font-variant-numeric:tabular-nums}
+.hero{background:linear-gradient(160deg,#0e5a3c 0%,#0a3f2a 100%);color:#fff;padding:46px 0 38px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 1px,transparent 1px 64px);pointer-events:none}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8fd3b4;font-weight:600}
+.hero h1{font-size:clamp(26px,4vw,40px);line-height:1.08;margin:10px 0 6px;color:#fff}
+.hero .cnpj{color:#bfe0cf;font-size:13px}
+.hero .meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:20px;font-size:13px;color:#bfe0cf}
+.hero .meta b{color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px;position:relative;z-index:2}
+.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px;position:relative}
+.kpi .n{font-family:Georgia,serif;font-size:23px;font-weight:600;color:#fff;line-height:1.15}
+.kpi .l{font-size:12px;color:#bfe0cf;margin-top:6px}
+.kpi.pending{border-style:dashed;opacity:.85}
+.kpi .soon{position:absolute;top:10px;right:10px;font-size:9px;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:2px 6px;border-radius:5px;color:#fff}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:0}
+.tab{padding:14px 20px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+section{padding:36px 0}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.sec-head .idx{font-family:Georgia,serif;font-size:14px;color:var(--brand);font-weight:700}
+.sec-head h2{font-size:23px}.sec-head p{margin:3px 0 0;color:var(--muted);font-size:14px}
+.gridcharts{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 4px;font-family:Inter;font-size:14px;font-weight:600}
+.card .cap{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.barrow{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.barrow .lab{width:92px;font-size:12.5px;color:var(--ink2);text-align:right;flex-shrink:0}
+.barrow .track{flex:1;background:var(--chip);border-radius:7px;height:26px;position:relative}
+.barrow .fill{height:100%;border-radius:7px;display:flex;align-items:center;padding-left:9px;color:#fff;font-size:12px;font-weight:600;min-width:24px}
+.bv{background:linear-gradient(90deg,#127a51,#0e5a3c)}
+.rank{display:flex;flex-direction:column;gap:9px}
+.rankrow{display:flex;align-items:center;gap:12px}
+.rankrow .pos{width:22px;height:22px;border-radius:6px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rankrow .rn{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rankrow .rv{font-size:13px;font-weight:700;color:var(--brand);flex-shrink:0;font-variant-numeric:tabular-nums}
+/* fluxo de caixa */
+.cashbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:var(--shadow);overflow:hidden}
+.cashbox .head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.cashbox .head h4{font-family:Georgia,serif;font-size:17px;font-weight:600;margin:0}
+.cashbox .head .badge{font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px}
+.badge.pos{background:#e5f4ec;color:#1d7a4f}.badge.neg{background:#f7dcd6;color:#a02d18}
+.flow{padding:8px 22px 18px}
+.frow{display:grid;grid-template-columns:1.6fr 1fr;gap:8px;padding:12px 0;border-bottom:1px dashed var(--line);font-size:14.5px;align-items:center}
+.frow .lbl{color:var(--ink2)}.frow .lbl small{display:block;color:var(--muted);font-size:11.5px;font-weight:400;margin-top:2px}
+.frow .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:15px}
+.frow.pay .v{color:var(--red)}.frow.recv .v{color:var(--brand)}
+.frow.wait .v{color:var(--muted);font-weight:500;font-style:italic;font-size:13px}
+.frow.total{border-top:2px solid var(--ink);border-bottom:none;margin-top:4px;padding-top:14px;font-size:16px}
+.frow.total .lbl{font-weight:700;color:var(--ink)}
+.frow.total .v{font-size:20px;font-family:Georgia,serif}
+.frow.total.pos .v{color:#1d7a4f}.frow.total.neg .v{color:#a02d18}
+.verdict{padding:16px 22px;font-size:13.5px;line-height:1.5}
+.verdict.pos{background:#f0f9f4;color:#1d5f3f;border-top:1px solid #d3ebdd}
+.verdict.neg{background:#fdf3f1;color:#8a3020;border-top:1px solid #f0d9d2}
+.macro-note{background:#fff8ec;border:1px solid #f0d9a8;border-radius:10px;padding:14px 16px;font-size:13.5px;color:#8a6412;margin-top:16px}
+.tools{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);padding:14px 0;width:100%;left:0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:220px;position:relative}
+.search input{width:100%;padding:11px 14px 11px 38px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;font-family:inherit}
+.search input:focus{outline:2px solid var(--brand2);outline-offset:-1px;border-color:transparent}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4}
+select,.btn{padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:13.5px;font-family:inherit;color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--brand2)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.fchip{padding:7px 13px;border:1px solid var(--line);background:#fff;border-radius:20px;font-size:13px;cursor:pointer;color:var(--ink2);white-space:nowrap}
+.fchip.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+.fchip .ct{opacity:.7;margin-left:5px;font-size:12px}
+.count{color:var(--muted);font-size:13px;margin:16px 0 10px}.count b{color:var(--ink)}
+.tscroll{width:100%;overflow-x:auto;border-radius:12px;box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
+table{width:100%;min-width:720px;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;table-layout:fixed}
+thead th{background:#f0f2f0;text-align:left;padding:11px 14px;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);font-weight:700;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+thead th.sortable:hover{color:var(--brand)}
+thead th.r,tbody td.r{text-align:right}
+tbody td{padding:11px 14px;border-bottom:1px solid #f0f1f2;font-size:13.5px;vertical-align:top}
+tbody tr:hover{background:#fafbfa}
+tbody tr.done{opacity:.5}tbody tr.done .nm{text-decoration:line-through}
+.nm{font-weight:600;color:var(--ink);word-break:break-word}.sub2{font-size:11.5px;color:var(--muted);margin-top:2px}
+.val{font-weight:700;font-variant-numeric:tabular-nums}
+.ck{width:17px;height:17px;cursor:pointer;accent-color:var(--brand)}
+.empty{text-align:center;padding:50px;color:var(--muted)}
+.more{text-align:center;margin:18px 0}
+footer{padding:30px 0 50px;color:var(--muted);font-size:12.5px;text-align:center;border-top:1px solid var(--line);margin-top:20px}
+.hidden{display:none}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.gridcharts{grid-template-columns:1fr}.hide-m{display:none}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr 1fr}.frow,.frow.total{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header class="hero"><div class="wrap">
+<div class="eyebrow">Rede Bandeirantes · Financeiro · Fluxo do Período</div>
+<h1>Posto Novo Horizonte</h1>
+<div class="cnpj mono">CNPJ 01.169.309/0001-72</div>
+<div class="meta"><div>Período · <b>24/08/2026 a 31/08/2026</b></div><div>Situação · <b>Pendente</b></div><div>Gerado em · <b>24/08/2026</b></div></div>
+<div class="kpis">
+<div class="kpi"><div class="n">R$ 234.427,27</div><div class="l">A pagar no período</div></div>
+<div class="kpi"><div class="n">R$ 90.823,85</div><div class="l">A receber (período + cartões)</div></div>
+<div class="kpi"><div class="n neg" style="color:#fff">−R$ 143.603,42</div><div class="l">Saldo projetado do período</div></div>
+<div class="kpi pending"><div class="soon">a definir</div><div class="n">—</div><div class="l">Limite bancário disponível</div></div>
+</div></div></header>
+
+<div class="wrap"><div class="tabs">
+<div class="tab on" data-tab="macro">Visão geral</div>
+<div class="tab" data-tab="detail" id="tabDetBtn">Detalhes a pagar</div>
+<div class="tab" data-tab="receber" id="tabRecBtn">Detalhes a receber</div>
+</div></div>
+
+<div id="tab-macro">
+<section><div class="wrap">
+<div class="sec-head"><span class="idx">01</span><div><h2>Vou ter caixa para o período?</h2><p>O que entra menos o que sai entre 24 e 31/08 — a base para decidir empréstimo, limite ou antecipação.</p></div></div>
+<div class="cashbox">
+<div class="head"><h4>Fluxo projetado do período</h4><span class="badge neg">Falta de caixa</span></div>
+<div class="flow">
+<div class="frow recv"><div class="lbl">A receber de clientes (24–31/08)<small>títulos que vencem no período</small></div><div class="v">R$ 59.499,13</div></div>
+<div class="frow recv"><div class="lbl">Cartões / PIX a compensar<small>saldo a receber das operadoras</small></div><div class="v">R$ 31.324,72</div></div>
+<div class="frow pay"><div class="lbl">A pagar no período<small>contas pendentes 24–31/08</small></div><div class="v">− R$ 234.427,27</div></div>
+<div class="frow total neg"><div class="lbl">Saldo projetado</div><div class="v">−R$ 143.603,42</div></div>
+</div>
+<div class="verdict neg">O que entra no período (<b>R$ 90.823,85</b>) <b>não cobre</b> o que há a pagar (<b>R$ 234.427,27</b>). Faltam <b>R$ 143.603,42</b> — é o valor a suprir com limite, antecipação ou empréstimo entre empresas.</div>
+</div>
+<div class="macro-note">Além do período, há <b>R$ 113.412,26</b> em recebíveis mais antigos (vencidos até 23/08, ainda não confirmados) que podem reforçar o caixa. O <b>limite bancário disponível</b> de cada conta ainda será informado pelo Lauro para fechar a decisão.</div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><span class="idx">02</span><div><h2>Como se distribui o que há a pagar</h2><p>Por data de vencimento e pelos maiores fornecedores do período.</p></div></div>
+<div class="gridcharts">
+<div class="card"><h4>Total por vencimento</h4><p class="cap">Quanto vence em cada data do período.</p><div id="chartVenc"></div></div>
+<div class="card"><h4>Top 8 fornecedores</h4><p class="cap">Maiores valores a pagar por fornecedor.</p><div class="rank" id="rankForn"></div></div>
+</div></div></section>
+</div>
+<div id="tab-detail" class="hidden">
+<div class="tools"><div class="wrap">
+<div class="sec-head" style="margin-bottom:14px"><span class="idx">03</span><div><h2>Detalhe das contas a pagar</h2><p>Todos os títulos do período. Busque, filtre por vencimento e marque o que já foi pago/conferido.</p></div></div>
+<div class="toolbar">
+<div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+<input id="q" placeholder="Buscar por fornecedor, nota ou CNPJ..."></div>
+<select id="sort"><option value="valor-desc">Maior valor</option><option value="valor-asc">Menor valor</option><option value="venc-asc">Vencimento (mais próximo)</option><option value="forn-asc">Fornecedor (A–Z)</option></select>
+<button class="btn" id="btnCsv">Exportar CSV</button>
+</div>
+<div class="chips" id="chips"></div>
+</div></div>
+<section style="padding-top:22px"><div class="wrap">
+<div class="count" id="count"></div>
+<div id="tableWrap"></div>
+<div class="more"><button class="btn" id="btnMore" style="display:none">Mostrar mais 100</button></div>
+</div></section>
+</div>
+<div id="tab-receber" class="hidden">
+<div class="tools"><div class="wrap">
+<div class="sec-head" style="margin-bottom:14px"><span class="idx">03</span><div><h2>Detalhes a receber</h2><p>Tudo que há para entrar: clientes do período, cartões/PIX a compensar e recebíveis em aberto. Filtre por origem.</p></div></div>
+<div class="toolbar">
+<div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+<input id="recQ" placeholder="Buscar por cliente, CNPJ ou origem..."></div>
+<select id="recSort"><option value="valor-desc">Maior valor</option><option value="valor-asc">Menor valor</option><option value="nome-asc">Cliente (A-Z)</option></select>
+<button class="btn" id="recCsv">Exportar CSV</button>
+</div>
+<div class="chips" id="recChips"></div>
+</div></div>
+<section style="padding-top:22px"><div class="wrap">
+<div class="count" id="recCount"></div>
+<div id="recWrap"></div>
+<div class="more"><button class="btn" id="recMore" style="display:none">Mostrar mais 100</button></div>
+</div></section>
+</div>
+<footer><div class="wrap">Posto Novo Horizonte · CNPJ 01.169.309/0001-72 · Período 24/08/2026 a 31/08/2026<br>Relatório gerado a partir dos extratos Argo Gerenciador e Plenustech · Documento interno Rede Bandeirantes.</div></footer>
+<script>
+const ROWS=[{"forn": "CASA SHOPPING MATERIAIS P/ CONSTRUCAO", "cnpj": "04.058.458/0001-52", "ref": "41600/1                 1", "venc": "24/08/2026", "valor": 445.9}, {"forn": "L. G. FERREIRA ROCHA", "cnpj": "49.723.652/0001-43", "ref": "2026                    1", "venc": "24/08/2026", "valor": 746.02}, {"forn": "SMALL DISTRIB. DERIV. PETROLEO LTDA", "cnpj": "02.044.526/0010-90", "ref": "125896/100              1 125896", "venc": "24/08/2026", "valor": 30900.0}, {"forn": "PAIVA & DE SOUZA PAIVA LTDA", "cnpj": "22.166.529/0002-01", "ref": "99124/1                 1", "venc": "25/08/2026", "valor": 1538.22}, {"forn": "SETTA COMBUSTIVEIS LTDA", "cnpj": "55.483.564/0016-09", "ref": "13969/5                 1 13969", "venc": "25/08/2026", "valor": 13598.5}, {"forn": "SMALL DISTRIB. DERIV. PETROLEO LTDA", "cnpj": "02.044.526/0010-90", "ref": "125983/100              1 125983", "venc": "25/08/2026", "valor": 44400.0}, {"forn": "URBANIN E NAVARRO COMERCIO DE ALIMENTOS LTDA", "cnpj": "41.177.108/0001-31", "ref": "262605/1                2 262605/1", "venc": "26/08/2026", "valor": 486.58}, {"forn": "SOUZA CRUZ LTDA", "cnpj": "33.009.911/0026-97", "ref": "36676/315               1", "venc": "26/08/2026", "valor": 974.3}, {"forn": "SOUZA CRUZ LTDA", "cnpj": "33.009.911/0026-97", "ref": "36318/315               2", "venc": "26/08/2026", "valor": 4167.56}, {"forn": "R. DE LEMOS MORAIS E A. DOS SANTOS COSTA LTDA", "cnpj": "19.031.636/0001-29", "ref": "3273/1                  2 0003273", "venc": "27/08/2026", "valor": 3050.0}, {"forn": "IMPERIAL DISTRIBUIDORA DE PETROLEO LTDA", "cnpj": "06.240.179/0001-30", "ref": "248950/1                1 248950", "venc": "27/08/2026", "valor": 53200.0}, {"forn": "IMPERIAL DISTRIBUIDORA DE PETROLEO LTDA", "cnpj": "06.240.179/0001-30", "ref": "248951/1                1 248951", "venc": "27/08/2026", "valor": 61000.0}, {"forn": "USE EQUIPAMENTOS DE SEGURANCA LTDA - ME", "cnpj": "23.001.703/0001-30", "ref": "516/2                   1", "venc": "28/08/2026", "valor": 153.63}, {"forn": "NITRO EQUIPAMENTOS E ASSISTENCIA TECNICA EM HIDRAULICA", "cnpj": "10.200.019/0001-35", "ref": "27529/1                 1", "venc": "28/08/2026", "valor": 681.67}, {"forn": "NITRO EQUIPAMENTOS E ASSISTENCIA TECNICA EM HIDRAULICA", "cnpj": "10.200.019/0001-35", "ref": "27432/1                 2", "venc": "28/08/2026", "valor": 845.0}, {"forn": "GCM COMERCIO DE LUBRIFICANTES LTDA", "cnpj": "33.090.721/0011-60", "ref": "132682/1                6 132682", "venc": "28/08/2026", "valor": 946.01}, {"forn": "N. DALPIAZ EPP", "cnpj": "10.978.271/0001-70", "ref": "4917/1                  1", "venc": "28/08/2026", "valor": 1660.0}, {"forn": "MARCIO AURELIO RODRIGUES DOS SANTOS", "cnpj": "03.696.001/0001-00", "ref": "3044/1                  1", "venc": "31/08/2026", "valor": 180.5}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4423/1                  1", "venc": "31/08/2026", "valor": 700.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4446/1                  1", "venc": "31/08/2026", "valor": 700.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4456/1                  1", "venc": "31/08/2026", "valor": 700.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4410/1                  1", "venc": "31/08/2026", "valor": 700.0}, {"forn": "J.W. MOTA - ME", "cnpj": "17.819.799/0002-26", "ref": "2200/1                  1", "venc": "31/08/2026", "valor": 1027.74}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4457/1                  1", "venc": "31/08/2026", "valor": 1120.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4419/1                  1", "venc": "31/08/2026", "valor": 1400.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4418/1                  1", "venc": "31/08/2026", "valor": 1400.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4413/1                  1", "venc": "31/08/2026", "valor": 1400.0}, {"forn": "J.W. MOTA - ME", "cnpj": "17.819.799/0002-26", "ref": "2199/1                  1", "venc": "31/08/2026", "valor": 1405.64}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4434/1                  1", "venc": "31/08/2026", "valor": 2100.0}, {"forn": "TRR BANDEIRANTES LTDA", "cnpj": "28.516.306/0001-14", "ref": "4467/1                  1", "venc": "31/08/2026", "valor": 2800.0}];
+const ISTRR=0, MACRO=0;
+const NUM=n=>n.toLocaleString('pt-BR');
+const BRL=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
+const BRL0=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  document.getElementById('tab-macro').classList.toggle('hidden',t.dataset.tab!=='macro');
+  const det=document.getElementById('tab-detail');if(det)det.classList.toggle('hidden',t.dataset.tab!=='detail');
+  const rec=document.getElementById('tab-receber');if(rec)rec.classList.toggle('hidden',t.dataset.tab!=='receber');
+});
+if(ROWS.length){
+// chart por vencimento
+const byv={};ROWS.forEach(r=>byv[r.venc]=(byv[r.venc]||0)+r.valor);
+const vs=Object.keys(byv).sort((a,b)=>(a.split('/').reverse().join())-(b.split('/').reverse().join()));
+const maxv=Math.max(...Object.values(byv),1);
+const cv=document.getElementById('chartVenc');
+if(cv)cv.innerHTML=vs.map(v=>{const w=byv[v]/maxv*100;const lbl=BRL0(byv[v]);const inside=w>=26;return `<div class="barrow"><div class="lab">${v.slice(0,5)}</div><div class="track"><div class="fill bv" style="width:${Math.max(w,3)}%">${inside?lbl:''}</div>${inside?'':`<span style="position:absolute;left:calc(${Math.max(w,3)}% + 8px);top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--ink2)">${lbl}</span>`}</div></div>`;}).join('');
+const byf={};ROWS.forEach(r=>byf[r.forn]=(byf[r.forn]||0)+r.valor);
+const topF=Object.entries(byf).sort((a,b)=>b[1]-a[1]).slice(0,8);
+const rf=document.getElementById('rankForn');
+if(rf)rf.innerHTML=topF.map((e,i)=>`<div class="rankrow"><div class="pos">${i+1}</div><div class="rn">${e[0]}</div><div class="rv">${BRL0(e[1])}</div></div>`).join('');
+// detail table
+let done={};try{done=JSON.parse(localStorage.getItem('cp_contas-p5')||'{}')}catch(e){}
+const saveDone=()=>{try{localStorage.setItem('cp_contas-p5',JSON.stringify(done))}catch(e){}};
+ROWS.forEach((r,i)=>r._id='r'+i);
+const vencs=[...new Set(ROWS.map(r=>r.venc))].sort((a,b)=>(a.split('/').reverse().join())-(b.split('/').reverse().join()));
+let fVenc='all';
+const chips=[{id:'all',lab:'Todos os vencimentos',n:ROWS.length}].concat(vencs.map(v=>({id:v,lab:v,n:ROWS.filter(r=>r.venc===v).length})));
+const chipsEl=document.getElementById('chips');
+if(chipsEl){chipsEl.innerHTML=chips.map(c=>`<div class="fchip ${c.id==='all'?'on':''}" data-v="${c.id}">${c.lab}<span class="ct">${c.n}</span></div>`).join('');
+document.querySelectorAll('.fchip').forEach(el=>el.onclick=()=>{document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));el.classList.add('on');fVenc=el.dataset.v;LIMIT=100;render();});}
+const q=document.getElementById('q'),sortSel=document.getElementById('sort');
+let LIMIT=100;
+[q,sortSel].forEach(el=>{if(el)el.addEventListener('input',()=>{LIMIT=100;render();})});
+const btnMore=document.getElementById('btnMore');if(btnMore)btnMore.onclick=()=>{LIMIT+=100;render();};
+function filtered(){let r=ROWS.slice();
+  if(fVenc!=='all')r=r.filter(x=>x.venc===fVenc);
+  const term=(q&&q.value.trim().toLowerCase())||'';
+  if(term)r=r.filter(x=>(x.forn+' '+x.ref+' '+x.cnpj).toLowerCase().includes(term));
+  const s=(sortSel&&sortSel.value)||'valor-desc';
+  r.sort((a,b)=>s==='valor-desc'?b.valor-a.valor:s==='valor-asc'?a.valor-b.valor:s==='forn-asc'?a.forn.localeCompare(b.forn):s==='venc-asc'?(a.venc.split('/').reverse().join()).localeCompare(b.venc.split('/').reverse().join()):0);
+  return r;}
+function render(){const r=filtered();const shown=r.slice(0,LIMIT);const soma=r.reduce((s,x)=>s+x.valor,0);const dn=r.filter(x=>done[x._id]).length;
+  document.getElementById('count').innerHTML=`Exibindo <b>${NUM(shown.length)}</b> de <b>${NUM(r.length)}</b> títulos · total no filtro: <b>${BRL(soma)}</b> · <b>${dn}</b> pagos/conferidos`;
+  const head=`<tr><th style="width:40px"></th><th class="sortable" data-s="forn-asc">Fornecedor</th><th class="hide-m" style="width:120px">Ref./Nota</th><th class="sortable r" data-s="venc-asc" style="width:120px">Vencimento</th><th class="sortable r" data-s="valor-desc" style="width:140px">Valor</th></tr>`;
+  const body=shown.map(x=>{const isD=!!done[x._id];return `<tr class="${isD?'done':''}"><td><input type="checkbox" class="ck" data-id="${x._id}" ${isD?'checked':''}></td><td><div class="nm">${x.forn}</div><div class="sub2">${x.cnpj}</div></td><td class="hide-m mono">${x.ref}</td><td class="r mono">${x.venc}</td><td class="r val">${BRL(x.valor)}</td></tr>`;}).join('');
+  document.getElementById('tableWrap').innerHTML=`<div class="tscroll"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+  if(btnMore)btnMore.style.display=r.length>LIMIT?'inline-block':'none';
+  document.querySelectorAll('.ck').forEach(c=>c.onchange=()=>{if(c.checked)done[c.dataset.id]=1;else delete done[c.dataset.id];saveDone();c.closest('tr').classList.toggle('done',c.checked);render();});
+  document.querySelectorAll('th.sortable').forEach(th=>th.onclick=()=>{if(sortSel)sortSel.value=th.dataset.s;LIMIT=100;render();});}
+render();
+const btnCsv=document.getElementById('btnCsv');
+if(btnCsv)btnCsv.onclick=()=>{const r=filtered();const esc=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  const head=['Fornecedor','CNPJ','Ref','Vencimento','Valor'];const lines=[head.map(esc).join(';')];
+  r.forEach(x=>lines.push([x.forn,x.cnpj,x.ref,x.venc,String(x.valor).replace('.',',')].map(esc).join(';')));
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='contas-p5_contas.csv';a.click();};
+} else {
+  const tb=document.getElementById('tabDetBtn');if(tb)tb.style.display='none';
+}
+
+// ===== DETALHES A RECEBER =====
+const RECDATA={"periodo": [{"cod": "1572", "nome": "CALABRIA MHG CONSTRUTORA LTDA", "cnpj": "02.639.244/0001-44", "qtd": 1, "valor": 10631.31, "saldo": 10631.31}, {"cod": "1945", "nome": "MUNICIPIO DE NOVO HORIZONTE DO NORTE", "cnpj": "03.238.888/0001-93", "qtd": 13, "valor": 42428.89, "saldo": 42428.89}, {"cod": "6983", "nome": "LATICINIOS CASTERLEITE LTDA", "cnpj": "36.875.045/0001-57", "qtd": 1, "valor": 4612.29, "saldo": 4612.29}, {"cod": "7268", "nome": "VALE DO ARINOS SPE S.A.", "cnpj": "62.222.000/0001-93", "qtd": 1, "valor": 1826.64, "saldo": 1826.64}], "aberto": [{"cod": "559", "nome": "R A SEMENSATO ME", "cnpj": "04.858.539/0001-37", "qtd": 1, "valor": 394.27, "saldo": 410.62}, {"cod": "1945", "nome": "MUNICIPIO DE NOVO HORIZONTE DO NORTE", "cnpj": "03.238.888/0001-93", "qtd": 18, "valor": 98777.36, "saldo": 101115.35}, {"cod": "6551", "nome": "JOSE LUIZ FERREIRA E PORTO FILHO", "cnpj": "030.010.561-42", "qtd": 1, "valor": 860.0, "saldo": 368.51}, {"cod": "7268", "nome": "VALE DO ARINOS SPE S.A.", "cnpj": "62.222.000/0001-93", "qtd": 1, "valor": 11261.58, "saldo": 11517.78}], "cartoes": [{"forma": "TICKETLOG - TICKETLOG CREDITO", "vl_liquido": 4961.91, "saldo": 4961.91}, {"forma": "PAGSEGURO - VISA CREDITO", "vl_liquido": 14856.09, "saldo": 12458.9}, {"forma": "PAGSEGURO - MASTER CREDITO", "vl_liquido": 15334.22, "saldo": 12857.29}, {"forma": "PAGSEGURO - ELO CREDITO", "vl_liquido": 583.43, "saldo": 563.84}, {"forma": "FITCARD - FITCARD VOUCHER", "vl_liquido": 482.78, "saldo": 482.78}]};
+(function(){
+  const cont=document.getElementById('recWrap');
+  if(!cont){return;}
+  const BRLr=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2});
+  const NUMr=n=>n.toLocaleString('pt-BR');
+  // build unified rows with origem
+  let R=[];
+  RECDATA.periodo.forEach(x=>R.push({nome:x.nome,cnpj:x.cnpj,qtd:x.qtd,valor:x.saldo,origem:'Clientes 24–31/08'}));
+  RECDATA.cartoes.forEach(x=>R.push({nome:x.forma,cnpj:'—',qtd:1,valor:x.saldo,origem:'Cartões/PIX'}));
+  RECDATA.aberto.forEach(x=>R.push({nome:x.nome,cnpj:x.cnpj,qtd:x.qtd,valor:x.saldo,origem:'Em aberto ≤23/08'}));
+  R.forEach((r,i)=>r._id='rec'+i);
+  let fOrig='all',LIMr=100;
+  const origens=['Clientes 24–31/08','Cartões/PIX','Em aberto ≤23/08'];
+  const totOrig=o=>R.filter(x=>x.origem===o).reduce((s,x)=>s+x.valor,0);
+  const chips=[{id:'all',lab:'Todas as origens',n:R.length}].concat(origens.map(o=>({id:o,lab:o,n:R.filter(x=>x.origem===o).length})));
+  document.getElementById('recChips').innerHTML=chips.map(c=>`<div class="fchip ${c.id==='all'?'on':''}" data-o="${c.id}">${c.lab}<span class="ct">${c.n}</span></div>`).join('');
+  document.querySelectorAll('#recChips .fchip').forEach(el=>el.onclick=()=>{document.querySelectorAll('#recChips .fchip').forEach(x=>x.classList.remove('on'));el.classList.add('on');fOrig=el.dataset.o;LIMr=100;renderR();});
+  const qr=document.getElementById('recQ'),sr=document.getElementById('recSort');
+  [qr,sr].forEach(el=>{if(el)el.addEventListener('input',()=>{LIMr=100;renderR();})});
+  const bmr=document.getElementById('recMore');if(bmr)bmr.onclick=()=>{LIMr+=100;renderR();};
+  function filteredR(){let r=R.slice();
+    if(fOrig!=='all')r=r.filter(x=>x.origem===fOrig);
+    const term=(qr&&qr.value.trim().toLowerCase())||'';
+    if(term)r=r.filter(x=>(x.nome+' '+x.cnpj+' '+x.origem).toLowerCase().includes(term));
+    const s=(sr&&sr.value)||'valor-desc';
+    r.sort((a,b)=>s==='valor-desc'?b.valor-a.valor:s==='valor-asc'?a.valor-b.valor:s==='nome-asc'?a.nome.localeCompare(b.nome):0);
+    return r;}
+  function renderR(){const r=filteredR();const shown=r.slice(0,LIMr);const soma=r.reduce((s,x)=>s+x.valor,0);
+    document.getElementById('recCount').innerHTML=`Exibindo <b>${NUMr(shown.length)}</b> de <b>${NUMr(r.length)}</b> lançamentos · total no filtro: <b>${BRLr(soma)}</b>`;
+    const head=`<tr><th class="sortable" data-s="nome-asc">Cliente / Origem</th><th class="hide-m" style="width:150px">CNPJ/CPF</th><th style="width:150px">Tipo</th><th class="sortable r" data-s="valor-desc" style="width:150px">A receber</th></tr>`;
+    const body=shown.map(x=>{let badge='';const bc=x.origem==='Cartões/PIX'?'#215e8c':x.origem==='Em aberto ≤23/08'?'#c8791b':'#0e5a3c';
+      return `<tr><td><div class="nm">${x.nome}</div><div class="sub2">${x.qtd} título(s)</div></td><td class="hide-m mono">${x.cnpj}</td><td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;background:${bc}18;color:${bc}">${x.origem}</span></td><td class="r val" style="color:var(--brand)">${BRLr(x.valor)}</td></tr>`;}).join('');
+    document.getElementById('recWrap').innerHTML=`<div class="tscroll"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+    if(bmr)bmr.style.display=r.length>LIMr?'inline-block':'none';
+    document.querySelectorAll('#tab-receber th.sortable').forEach(th=>th.onclick=()=>{if(sr)sr.value=th.dataset.s;LIMr=100;renderR();});}
+  renderR();
+  const bc=document.getElementById('recCsv');
+  if(bc)bc.onclick=()=>{const r=filteredR();const esc=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+    const head=['Cliente','CNPJ','Origem','Titulos','A receber'];const lines=[head.map(esc).join(';')];
+    r.forEach(x=>lines.push([x.nome,x.cnpj,x.origem,x.qtd,String(x.valor).replace('.',',')].map(esc).join(';')));
+    const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='contas-p5_receber.csv';a.click();};
+})();
+
+</script></body></html>
